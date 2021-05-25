@@ -1,19 +1,19 @@
-version: "2.3"
+version: "3.2"
 
 # Use this file for an example for production
 
 services:
   mariadb:
-    image: mariadb:10.2.14
+    image: mariadb:10.4
     restart: always
     stdin_open: true
     environment:
-      - MYSQL_ROOT_PASSWORD=iop
+      - MYSQL_ROOT_PASSWORD=itop
       - MYSQL_DATABASE=itop
       - MYSQL_USER=itop
       - MYSQL_PASSWORD=itop
     volumes:
-      - ./volumes/mariadb:/var/lib/mysql
+      - itop-mariadb:/var/lib/mysql
   itop:
     build:
       context: .
@@ -25,7 +25,7 @@ services:
       - ITOP_DB_NAME=itop
       - ITOP_DB_USER=itop
       - ITOP_DB_PASS=itop
-      - PHP_TIMEZONE="Europe/Paris"
+      - PHP_TIMEZONE="Europe/Moscow"
       - PHP_ENABLE_UPLOADS="On"
       - PHP_MEMORY_LIMIT="256M"
       - PHP_POST_MAX_SIZE="10M"
@@ -36,11 +36,14 @@ services:
       - PHP_ERROR_REPORTING="E_ALL" # Production Value: E_ALL & ~E_DEPRECATED & ~E_STRICT
     links:
       - mariadb:db
+    depends_on: 
+      - mariadb
     ports:
       - "8080:80"
     volumes:
-      - ./volumes/itop/config:/var/www/html/config
+      - itop-config:/var/www/html/config
   phpmyadmin:
+    # #=== php set sessions path | RUN echo session.save_path=/sessions/itop >> /etc/php.ini
     image: phpmyadmin/phpmyadmin
     restart: always
     stdin_open: true
@@ -49,4 +52,9 @@ services:
     ports:
       - "8000:80"
     volumes:
-      - ./volumes/sessions:/sessions
+      - itop-sessions:/var/lib/php/session
+volumes: 
+  itop-mariadb:
+  itop-config:
+  itop-sessions:
+  
